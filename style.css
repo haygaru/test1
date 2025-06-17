@@ -62,21 +62,158 @@ body {
     color: #333;
 }
 
+/* Styling for detailed information in Searched City Card */
 .weather-info-card p {
-    margin-bottom: 8px;
-    color: #555;
+    margin-bottom: 6px; /* Consistent margin */
+    font-size: 0.95em; /* Ensure consistency within the card */
+    line-height: 1.3;
 }
 
-/* Minor adjustment to the main weather info for current location for consistency */
+/* Ensure "Condition" text is capitalized in searched city card too */
+/* Note: This selector is heuristic. A class on the <p> tag in JS would be more robust. */
+.weather-info-card p:first-of-type + img + p + p {
+    text-transform: capitalize;
+}
+
+/* Refine the temperature display in the searched city card */
+.weather-info-card h3 + img + p:first-of-type { /* Targets the temperature paragraph */
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+
+/* Main weather info for current location */
 .weather-info {
     padding: 15px;
     background-color: rgba(255, 255, 255, 0.85); /* Slightly different from searched cards for distinction */
     border-radius: 6px;
 }
 
-/* Keep existing rule for p tags inside .weather-info, or adjust if necessary.
-   If the new .weather-info rule above is sufficient, this might be redundant or need adjustment.
-   For now, I'll keep it as it was, assuming it might still be relevant for the direct children p tags. */
+/* Styling for detailed information in Current Weather section */
 .weather-info p {
-    margin-bottom: 10px;
+    margin-bottom: 8px; /* Consistent margin for all p tags in this section */
+    font-size: 1em;   /* Ensure consistent font size */
+    line-height: 1.4; /* Improve readability */
+}
+
+
+/* Styling for the 5-Day Forecast Section */
+#forecast-container {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.8); /* Slightly different background for distinction */
+    border-radius: 6px;
+}
+
+#forecast-container h2 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.forecast-days {
+    display: flex;
+    justify-content: space-between; /* Distribute days evenly */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 10px; /* Space between forecast day cards */
+}
+
+.forecast-day {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    text-align: center;
+    flex-basis: calc(20% - 10px); /* Aim for 5 items per row, adjusting for gap */
+    min-width: 120px; /* Minimum width before wrapping */
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
+}
+
+.forecast-day p {
+    margin: 5px 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.forecast-day .forecast-date {
+    font-weight: bold;
+    color: #2193b0; /* Theme color */
+    font-size: 0.95em;
+}
+
+.forecast-day .forecast-temp {
+    font-size: 0.9em;
+}
+
+.forecast-day .forecast-condition { /* Specific class for condition in forecast */
+    font-size: 0.85em;
+    text-transform: capitalize;
+}
+
+/* Responsive adjustments for forecast days */
+@media (max-width: 768px) {
+    .forecast-day {
+        flex-basis: calc(33.333% - 10px); /* 3 items per row */
+    }
+}
+
+@media (max-width: 480px) {
+    .forecast-day {
+        flex-basis: calc(50% - 10px); /* 2 items per row */
+    }
+}
+
+@media (max-width: 320px) {
+    .forecast-day {
+        flex-basis: 100%; /* 1 item per row */
+    }
+}
+
+/* General Weather Icon Styling */
+.weather-icon {
+    width: 50px;  /* Default size, can be overridden */
+    height: 50px;
+    vertical-align: middle; /* Helps align if next to text */
+}
+
+/* Current Weather Icon Styling */
+#current-weather-icon {
+    width: 70px; /* Slightly larger for main display */
+    height: 70px;
+    margin-right: 10px; /* Space if text is directly next to it */
+}
+
+.current-weather-main {
+    display: flex; /* Align icon and temperature nicely */
+    align-items: center; /* Vertically center items in this flex container */
+    margin-bottom: 5px;
+}
+
+.current-weather-main .current-temp {
+    font-size: 1.8em; /* Make temperature more prominent */
+    font-weight: bold;
+    margin: 0; /* Remove default p margin */
+}
+
+#current-weather-description {
+    text-transform: capitalize; /* Nice capitalization for description */
+    font-size: 1.1em;
+    margin-bottom: 10px; /* This was already part of .weather-info p, but explicit is fine */
+}
+
+
+/* Searched City Card Icon Styling */
+.weather-info-card .weather-icon {
+    display: block; /* Make it a block to allow margin auto for centering */
+    margin: 0 auto 5px auto; /* Center the icon */
+    width: 60px;
+    height: 60px;
+}
+
+/* Forecast Day Icon Styling */
+.forecast-day .forecast-icon { /* Using .forecast-icon to be specific */
+    width: 40px;
+    height: 40px;
+    display: block; /* Center it */
+    margin: 5px auto;
 }
