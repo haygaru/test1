@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App Test</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather App Test</h1>
+        <div class="weather-info">
+            <p>Temperature: <span id="temperature">--</span>°C</p>
+            <p>Wind Speed: <span id="wind-speed">--</span> m/s</p>
+            <p>Humidity: <span id="humidity">--</span>%</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Mock Geolocation
+        navigator.geolocation.getCurrentPosition = function(success, error) {
+            const position = {
+                coords: {
+                    latitude: 12.34,
+                    longitude: 56.78
+                }
+            };
+            success(position);
+        };
+
+        // Mock Fetch
+        const mockWeatherData = {
+            main: {
+                temp: 25,
+                humidity: 60
+            },
+            wind: {
+                speed: 5
+            }
+        };
+        fetch = async function(url) {
+            return {
+                json: async () => mockWeatherData
+            };
+        };
+
+        // Run tests
+        window.onload = async () => {
+            await getWeather(); // Ensure weather data is fetched and displayed
+
+            // Wait for the DOM to update
+            setTimeout(() => {
+                const tempElement = document.getElementById('temperature');
+                const windElement = document.getElementById('wind-speed');
+                const humidityElement = document.getElementById('humidity');
+
+                let testsPassed = true;
+
+                if (tempElement.textContent !== '25') {
+                    console.error('Test Failed: Temperature mismatch. Expected 25, got', tempElement.textContent);
+                    testsPassed = false;
+                }
+                if (windElement.textContent !== '5') {
+                    console.error('Test Failed: Wind speed mismatch. Expected 5, got', windElement.textContent);
+                    testsPassed = false;
+                }
+                if (humidityElement.textContent !== '60') {
+                    console.error('Test Failed: Humidity mismatch. Expected 60, got', humidityElement.textContent);
+                    testsPassed = false;
+                }
+
+                if (testsPassed) {
+                    console.log('All tests passed!');
+                }
+            }, 500); // Adjust timeout if necessary
+        };
+    </script>
+</body>
+</html>
