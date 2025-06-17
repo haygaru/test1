@@ -1,18 +1,17 @@
 const apiKey = '3bc6b358a6c850df8f2f4c82f9bf4187'; // Replace with your OpenWeatherMap API key
 
-/*
 function getWeather() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            fetchWeatherData(lat, lon); // This function will also be removed
+            fetchWeatherData(lat, lon);
         }, showError);
     } else {
-        alert("Geolocation is not supported by this browser.");
+        // We'll handle this more gracefully in the UI later (Error Handling step)
+        alert("Geolocation is not supported by this browser. Please search for a city.");
     }
 }
-*/
 
 function formatUnixTime(unixTimestamp, timezoneOffset) {
     // Create a date object from the unix timestamp (in milliseconds)
@@ -28,55 +27,72 @@ function formatUnixTime(unixTimestamp, timezoneOffset) {
     return `${formattedHours}:${formattedMinutes} ${ampm}`;
 }
 
-/*
 async function fetchWeatherData(lat, lon) {
+    // Clear any existing searched city weather
+    const searchedWeatherContainer = document.getElementById('searched-weather-container');
+    if (searchedWeatherContainer) {
+        searchedWeatherContainer.innerHTML = '';
+        searchedWeatherContainer.style.display = 'none'; // Hide it
+    }
+
+    // Ensure geolocation section is visible
+    const geolocationWeatherSection = document.getElementById('geolocation-weather-section');
+    if (geolocationWeatherSection) geolocationWeatherSection.style.display = 'block'; // Or 'flex' etc. depending on its CSS
+
+    // Clear the shared forecast display area before populating
+    const forecastDisplayArea = document.getElementById('forecast-display-area');
+    if (forecastDisplayArea) forecastDisplayArea.innerHTML = '';
+
     const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
     try {
         const response = await fetch(apiUrl);
-        const data = await response.json();
-        displayCurrentLocationWeather(data); // This function will also be removed
-
-        const forecastData = await fetchForecastData(lat, lon);
-        if (forecastData) {
-            processAndDisplayForecast(forecastData); // Keep this call if forecast should still load by default, or remove if forecast is only for searched cities
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Error fetching current weather: ${errorData.message || response.statusText}`);
+            return;
         }
+        const currentWeatherData = await response.json();
+        displayCurrentLocationWeather(currentWeatherData); // This will display in the restored .weather-info div
+
+        // Fetch and display forecast for this geolocated weather
+        const forecastApiData = await fetchForecastData(lat, lon); // fetchForecastData already exists
+        if (forecastApiData && forecastDisplayArea) { // Ensure forecastDisplayArea exists
+             processAndDisplayForecast(forecastApiData, forecastDisplayArea); // processAndDisplayForecast will render into this shared area
+        } else if (forecastApiData && !forecastDisplayArea) {
+            console.error("Forecast display area not found for geolocation forecast.");
+        }
+
     } catch (error) {
-        console.error('Error fetching weather data:', error);
-        alert('Failed to fetch weather data. Please try again.');
+        console.error('Error fetching current weather data:', error);
+        alert('Failed to fetch current weather data. Please try again.');
     }
 }
-*/
 
-/*
 function displayCurrentLocationWeather(data) {
-    // Update temperature, wind speed, humidity as before
-    document.getElementById('temperature').textContent = data.main.temp.toFixed(1); // Add toFixed(1) for consistency
-    document.getElementById('wind-speed').textContent = data.wind.speed;
-    document.getElementById('humidity').textContent = data.main.humidity;
+    // Ensure the .weather-info div (or its new equivalent) is targeted correctly.
+    // This requires the HTML to be restored first.
+    const tempEl = document.getElementById('temperature');
+    const windEl = document.getElementById('wind-speed');
+    const humidityEl = document.getElementById('humidity');
+    const descriptionEl = document.getElementById('current-weather-description');
+    const iconEl = document.getElementById('current-weather-icon');
+    const feelsLikeEl = document.getElementById('current-feels-like');
+    const sunriseEl = document.getElementById('current-sunrise');
+    const sunsetEl = document.getElementById('current-sunset');
 
-    // Update weather description
-    const descriptionElement = document.getElementById('current-weather-description');
-    if (descriptionElement) {
-        descriptionElement.textContent = `Condition: ${data.weather[0].description}`;
+    if (tempEl) tempEl.textContent = data.main.temp.toFixed(1);
+    if (windEl) windEl.textContent = data.wind.speed;
+    if (humidityEl) humidityEl.textContent = data.main.humidity;
+    if (descriptionEl) descriptionEl.textContent = `Condition: ${data.weather[0].description}`;
+    if (iconEl) {
+        iconEl.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        iconEl.alt = data.weather[0].description;
+        iconEl.style.display = 'block';
     }
-
-    // Update weather icon
-    const iconElement = document.getElementById('current-weather-icon');
-    if (iconElement) {
-        const iconCode = data.weather[0].icon;
-        iconElement.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-        iconElement.alt = data.weather[0].description;
-        iconElement.style.display = 'block';
-    }
-
-    // New detailed information
-    document.getElementById('current-feels-like').textContent = data.main.feels_like.toFixed(1);
-    // data.sys.sunrise and data.sys.sunset are UNIX timestamps in seconds, UTC.
-    // data.timezone is the shift in seconds from UTC for the location.
-    document.getElementById('current-sunrise').textContent = formatUnixTime(data.sys.sunrise, data.timezone);
-    document.getElementById('current-sunset').textContent = formatUnixTime(data.sys.sunset, data.timezone);
+    if (feelsLikeEl) feelsLikeEl.textContent = data.main.feels_like.toFixed(1);
+    if (sunriseEl) sunriseEl.textContent = formatUnixTime(data.sys.sunrise, data.timezone);
+    if (sunsetEl) sunsetEl.textContent = formatUnixTime(data.sys.sunset, data.timezone);
 }
-*/
 
 async function fetchWeatherByCity(city) {
     const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
@@ -87,15 +103,33 @@ async function fetchWeatherByCity(city) {
             alert(`Error: ${errorData.message || response.statusText}`);
             return;
         }
-        const currentWeatherData = await response.json(); // Renamed 'data' to 'currentWeatherData' for clarity
+        // Clear geolocation weather display
+        const geolocationWeatherSection = document.getElementById('geolocation-weather-section');
+        // if (geolocationWeatherSection) geolocationWeatherSection.innerHTML = ''; // Or hide it: .style.display = 'none';
+        // Decided to hide, and also clear its specific forecast from the shared area
+        if (geolocationWeatherSection) geolocationWeatherSection.style.display = 'none';
 
-        // displaySearchedCityWeather now returns the container for this city's forecast
-        const specificForecastDOMElement = displaySearchedCityWeather(currentWeatherData);
 
+        // Clear previous searched city's current weather (if any, from #searched-weather-container)
+        const searchedWeatherContainer = document.getElementById('searched-weather-container');
+        if (searchedWeatherContainer) searchedWeatherContainer.innerHTML = '';
+
+        // Clear the shared forecast display area
+        const forecastDisplayArea = document.getElementById('forecast-display-area');
+        if (forecastDisplayArea) forecastDisplayArea.innerHTML = '';
+
+        const currentWeatherData = await response.json();
+
+        // displaySearchedCityWeather now just displays current weather for the searched city
+        // into #searched-weather-container. It no longer returns a forecast element.
+        displaySearchedCityWeather(currentWeatherData);
+
+        // Fetch and display forecast for this searched city into the shared #forecast-display-area
         const forecastAPIData = await fetchForecastData(currentWeatherData.coord.lat, currentWeatherData.coord.lon, city);
-        if (forecastAPIData && specificForecastDOMElement) {
-            // Pass the specific DOM element to render this city's forecast into
-            processAndDisplayForecast(forecastAPIData, specificForecastDOMElement);
+        if (forecastAPIData && forecastDisplayArea) {
+            processAndDisplayForecast(forecastAPIData, forecastDisplayArea);
+        } else if (forecastAPIData && !forecastDisplayArea) {
+            console.error("Forecast display area not found for searched city forecast.");
         }
     } catch (error) {
         console.error('Error fetching weather data for city:', error);
@@ -103,41 +137,35 @@ async function fetchWeatherByCity(city) {
     }
 }
 
-// Add a global counter or a variable in a suitable scope to track color index
-let cityBlockColorIndex = 0;
-const colorClasses = [
-    'city-weather-block-color-1',
-    'city-weather-block-color-2',
-    'city-weather-block-color-3',
-    'city-weather-block-color-4'
-];
+// Color cycling variables (cityBlockColorIndex, colorClasses) are removed as they are no longer used.
 
-function displaySearchedCityWeather(data) {
-    const mainResultsContainer = document.getElementById('searched-weather-container');
+function displaySearchedCityWeather(data) { // No longer returns a value
+    const searchedWeatherContainer = document.getElementById('searched-weather-container');
+    if (!searchedWeatherContainer) {
+        console.error("Searched weather container not found.");
+        return;
+    }
+    searchedWeatherContainer.innerHTML = '';
+    searchedWeatherContainer.style.display = 'block'; // Make sure it's visible
 
-    const cityWeatherBlock = document.createElement('div');
-    cityWeatherBlock.classList.add('city-weather-block');
-    cityWeatherBlock.setAttribute('data-city-name', data.name);
+    // Hide geolocation section when displaying searched city
+    const geolocationWeatherSection = document.getElementById('geolocation-weather-section');
+    if (geolocationWeatherSection) geolocationWeatherSection.style.display = 'none';
 
-    // Apply cycling color class
-    cityWeatherBlock.classList.add(colorClasses[cityBlockColorIndex]);
-    cityBlockColorIndex = (cityBlockColorIndex + 1) % colorClasses.length; // Cycle through colors
 
-    // --- Current Weather Card ---
     const weatherCard = document.createElement('div');
-    weatherCard.className = 'weather-info-card'; // Existing class for styling
+    weatherCard.className = 'weather-info-card';
 
     const cityName = data.name;
     const temp = data.main.temp.toFixed(1);
-    const feelsLike = data.main.feels_like.toFixed(1); // New
+    const feelsLike = data.main.feels_like.toFixed(1);
     const windSpeed = data.wind.speed;
     const humidity = data.main.humidity;
     const description = data.weather[0].description;
     const iconCode = data.weather[0].icon;
     const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-    // Sunrise/Sunset for searched city
-    const sunriseTime = formatUnixTime(data.sys.sunrise, data.timezone); // New
-    const sunsetTime = formatUnixTime(data.sys.sunset, data.timezone);   // New
+    const sunriseTime = formatUnixTime(data.sys.sunrise, data.timezone);
+    const sunsetTime = formatUnixTime(data.sys.sunset, data.timezone);
 
     weatherCard.innerHTML = `
         <h3>Current Weather in ${cityName}</h3>
@@ -149,19 +177,7 @@ function displaySearchedCityWeather(data) {
         <p>Sunrise: ${sunriseTime}</p>
         <p>Sunset: ${sunsetTime}</p>
     `;
-    cityWeatherBlock.appendChild(weatherCard);
-
-    // --- Container for this city's 5-day forecast ---
-    const cityForecastContainer = document.createElement('div');
-    cityForecastContainer.className = 'city-forecast-container'; // New class for this specific forecast
-    // We'll give it a unique ID or class if needed for processAndDisplayForecast to target,
-    // or pass the element directly. Passing element is cleaner.
-    cityWeatherBlock.appendChild(cityForecastContainer);
-
-    mainResultsContainer.appendChild(cityWeatherBlock); // Add this city's block to the main container
-
-    // Return the specific forecast container for this city
-    return cityForecastContainer;
+    searchedWeatherContainer.appendChild(weatherCard);
 }
 
 async function fetchForecastData(lat, lon, cityName = null) {
@@ -300,26 +316,24 @@ function processAndDisplayForecast(forecastData, targetElement) {
     });
 }
 
-/*
 function showError(error) {
+    let message = "An unknown error occurred while trying to get your location.";
     switch(error.code) {
         case error.PERMISSION_DENIED:
-            alert("User denied the request for Geolocation.");
+            message = "You denied the request for Geolocation. Please search for a city or enable location services.";
             break;
         case error.POSITION_UNAVAILABLE:
-            alert("Location information is unavailable.");
+            message = "Location information is unavailable. Please search for a city.";
             break;
         case error.TIMEOUT:
-            alert("The request to get user location timed out.");
-            break;
-        case error.UNKNOWN_ERROR:
-            alert("An unknown error occurred.");
+            message = "The request to get user location timed out. Please search for a city.";
             break;
     }
+    // We'll replace alert with a UI message in a later step.
+    alert(message);
 }
-*/
 
-// window.onload = getWeather;
+window.onload = getWeather;
 
 document.getElementById('search-button').addEventListener('click', () => {
     const city = document.getElementById('city-input').value;

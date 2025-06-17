@@ -9,13 +9,40 @@
 <body>
     <div class="container">
         <h1>Weather App</h1>
+
+        <!-- Section for Geolocation Weather -->
+        <div id="geolocation-weather-section">
+            <h3>Current Weather (Your Location)</h3>
+            <div class="weather-info-card" id="current-location-weather-card">
+                <div class="current-weather-main">
+                     <img id="current-weather-icon" src="" alt="Weather icon" style="display:none;">
+                     <p class="current-temp">Temperature: <span id="temperature">--</span>°C</p>
+                </div>
+                <p id="current-weather-description">Condition: --</p>
+                <p>Feels Like: <span id="current-feels-like">--</span>°C</p>
+                <p>Wind Speed: <span id="wind-speed">--</span> m/s</p>
+                <p>Humidity: <span id="humidity">--</span>%</p>
+                <p>Sunrise: <span id="current-sunrise">--</span></p>
+                <p>Sunset: <span id="current-sunset">--</span></p>
+            </div>
+        </div>
+
+        <!-- Search Functionality -->
         <div class="search-container">
             <input type="text" id="city-input" placeholder="Enter city name">
             <button id="search-button">Search</button>
         </div>
+
+        <!-- Container for Searched City's CURRENT Weather -->
         <div id="searched-weather-container">
-            <!-- Weather for searched locations will be added here by script.js -->
+            <!-- The current weather card for a searched city will be injected here by script.js -->
         </div>
+
+        <!-- Shared area for 5-Day Forecast display (for EITHER geolocation or searched city) -->
+        <div id="forecast-display-area">
+            <!-- Forecasts will be injected here by processAndDisplayForecast -->
+        </div>
+
     </div>
     <script src="script.js"></script>
 </body>

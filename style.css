@@ -5,223 +5,178 @@ body {
     align-items: center;
     min-height: 100vh;
     background: linear-gradient(to right, #6dd5ed, #2193b0);
-    margin: 0; /* Add this to remove default body margin */
+    margin: 0;
 }
 
 .container {
-    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
-    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 15px; /* Adjusted base padding */
     border-radius: 8px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 90%; /* More flexible width */
+    max-width: 800px; /* Max width for larger screens */
+    margin: 20px auto; /* Centering and some margin */
 }
 
-/* Styling for the search input and button */
+h1 {
+    font-size: 1.8em;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* Responsive Search Container */
 .search-container {
     display: flex;
+    flex-direction: column; /* Stack on small screens by default */
     margin-bottom: 20px;
-    gap: 10px; /* Adds space between input and button */
+    gap: 10px;
 }
-
 #city-input {
-    flex-grow: 1; /* Allows input to take available space */
+    flex-grow: 1;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 1em; /* Use em for better scalability */
 }
-
 #search-button {
     padding: 10px 15px;
-    background-color: #2193b0; /* Matching one of the gradient colors */
+    background-color: #2193b0;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1em;
 }
 
 #search-button:hover {
-    background-color: #6dd5ed; /* Lighter shade for hover */
+    background-color: #6dd5ed;
 }
 
-/* Styling for the searched weather results container and cards */
+/* Styling for the searched weather results container (current weather card) */
 #searched-weather-container {
     margin-top: 20px;
-    padding-top: 10px; /* Add some space above the first city block */
+    /* padding-top: 10px; /* Removed, padding is on .container now */
 }
 
-.weather-info-card {
-    background-color: rgba(255, 255, 255, 0.95); /* Slightly more opaque than main container for emphasis */
+/* Styling for geolocation weather section and searched city current weather card */
+.weather-info-card { /* This class is used by both geo and searched city current weather */
+    background-color: rgba(255, 255, 255, 0.95);
     padding: 15px;
     border-radius: 6px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin-bottom: 15px; /* Space between multiple searched city cards, if we implement that later */
+    /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Can be removed if container shadow is enough */
+    margin-bottom: 15px;
 }
 
 .weather-info-card h3 {
     margin-top: 0;
     color: #333;
+    font-size: 1.3em; /* Base size */
+    margin-bottom: 10px;
 }
 
-/* Styling for detailed information in Searched City Card */
 .weather-info-card p {
-    margin-bottom: 6px; /* Consistent margin */
-    font-size: 0.95em; /* Ensure consistency within the card */
+    margin-bottom: 6px;
+    font-size: 0.95em; /* Base size */
     line-height: 1.3;
 }
 
-/* Ensure "Condition" text is capitalized in searched city card too */
-/* Note: This selector is heuristic. A class on the <p> tag in JS would be more robust. */
-.weather-info-card p:first-of-type + img + p + p {
+/* Specifics for current-weather-main in geolocation card */
+#geolocation-weather-section .current-weather-main .current-temp {
+    font-size: 1.6em; /* Base size */
+    font-weight: bold; /* Ensure this is bold */
+    margin: 0;
+}
+#geolocation-weather-section #current-weather-description {
     text-transform: capitalize;
+    font-size: 1.1em; /* Ensure consistency with how it was before */
 }
 
-/* Refine the temperature display in the searched city card */
-.weather-info-card h3 + img + p:first-of-type { /* Targets the temperature paragraph */
-    font-size: 1.1em;
+
+/* Styling for detailed information in Searched City Card (if different from geo) */
+/* The general .weather-info-card p should cover most things */
+#searched-weather-container .weather-info-card p:first-of-type + img + p + p { /* Heuristic for condition */
+    text-transform: capitalize;
+}
+#searched-weather-container .weather-info-card h3 + img + p:first-of-type { /* Temp paragraph */
+    font-size: 1.1em; /* Slightly smaller than geo's prominent temp if desired */
     font-weight: bold;
 }
 
 
-/* Main weather info for current location (styles for the removed section) */
-/* These .weather-info rules are now effectively unused but kept for reference or if section is re-added */
-.weather-info {
-    padding: 15px;
-    background-color: rgba(255, 255, 255, 0.85);
-    border-radius: 6px;
+/* Shared Forecast Display Area */
+#forecast-display-area {
+    margin-top: 20px;
 }
-
-.weather-info p {
-    margin-bottom: 8px;
-    font-size: 1em;
-    line-height: 1.4;
-}
-
-
-/* Styling for the 5-Day Forecast Section (old static container, now unused) */
-/* These #forecast-container rules are now effectively unused */
-#forecast-container {
-    margin-top: 30px;
-    padding: 15px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 6px;
-}
-
-#forecast-container h2 {
+#forecast-display-area h4 { /* Heading for the 5-day forecast section */
     text-align: center;
     margin-bottom: 15px;
+    font-size: 1.2em;
     color: #333;
 }
 
-/* General forecast day styling - these are still used by dynamically created forecasts */
 .forecast-days {
     display: flex;
-    justify-content: space-between; /* Distribute days evenly */
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
-    gap: 10px; /* Space between forecast day cards */
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .forecast-day {
     background-color: rgba(255, 255, 255, 0.9);
-    padding: 12px 10px; /* Slightly increase vertical padding if needed */
+    padding: 10px; /* Ensure padding is not too large on small screens */
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     text-align: center;
-    flex-basis: calc(20% - 10px); /* Aim for 5 items per row, adjusting for gap */
-    min-width: 120px; /* Minimum width before wrapping */
-    box-sizing: border-box; /* Include padding and border in element's total width and height */
+    flex-basis: calc(20% - 10px);
+    min-width: 110px; /* Adjusted min-width slightly */
+    box-sizing: border-box;
 }
 
 .forecast-day p {
     margin: 5px 0;
-    font-size: 0.9em;
+    font-size: 0.85em; /* Base size for forecast text */
     color: #555;
 }
-
 .forecast-day .forecast-date {
     font-weight: bold;
-    color: #2193b0; /* Theme color */
-    font-size: 0.95em;
-}
-
-.forecast-day .forecast-temp {
+    color: #2193b0;
     font-size: 0.9em;
 }
-
+.forecast-day .forecast-temp {
+    font-size: 0.85em; /* Match other p */
+}
 .forecast-day .forecast-condition {
     font-size: 0.85em;
     text-transform: capitalize;
-    color: #555; /* Ensure it's not too light if other p tags are lighter */
-    min-height: 2.5em; /* Attempt to reserve space for 1-2 lines of description */
+    color: #555;
+    min-height: 2.5em;
 }
-
 .forecast-day .forecast-pop,
 .forecast-day .forecast-wind {
-    font-size: 0.8em; /* Slightly smaller for secondary info, or match other details like condition */
-    color: #666; /* Slightly lighter color for secondary info */
-    margin-top: 3px; /* Add a little space above these new lines */
-}
-
-/* Responsive adjustments for forecast days */
-@media (max-width: 768px) {
-    .forecast-day {
-        flex-basis: calc(33.333% - 10px); /* 3 items per row */
-    }
-}
-
-@media (max-width: 480px) {
-    .forecast-day {
-        flex-basis: calc(50% - 10px); /* 2 items per row */
-    }
-}
-
-@media (max-width: 320px) {
-    .forecast-day {
-        flex-basis: 100%; /* 1 item per row */
-    }
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 3px;
 }
 
 /* General Weather Icon Styling */
 .weather-icon {
-    width: 50px;  /* Default size, can be overridden */
+    width: 50px;
     height: 50px;
-    vertical-align: middle; /* Helps align if next to text */
+    vertical-align: middle;
 }
-
-/* Current Weather Icon Styling (for the removed section, now unused) */
-#current-weather-icon {
+/* Geolocation specific icon */
+#current-weather-icon { /* Used in geolocation card */
     width: 70px;
     height: 70px;
     margin-right: 10px;
 }
-
-.current-weather-main {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.current-weather-main .current-temp {
-    font-size: 1.8em;
-    font-weight: bold;
-    margin: 0;
-}
-
-#current-weather-description {
-    text-transform: capitalize;
-    font-size: 1.1em;
-    margin-bottom: 10px;
-}
-
-
 /* Searched City Card Icon Styling */
-.weather-info-card .weather-icon {
+#searched-weather-container .weather-info-card .weather-icon {
     display: block;
     margin: 0 auto 5px auto;
     width: 60px;
     height: 60px;
 }
-
 /* Forecast Day Icon Styling */
 .forecast-day .forecast-icon {
     width: 40px;
@@ -230,58 +185,55 @@ body {
     margin: 5px auto;
 }
 
-/* Predefined background tints for city weather blocks */
-.city-weather-block-color-1 {
-    background-color: rgba(230, 240, 255, 0.85); /* Light blue tint */
-    border-left: 5px solid #6dd5ed;
-}
-.city-weather-block-color-2 {
-    background-color: rgba(230, 255, 230, 0.85); /* Light green tint */
-    border-left: 5px solid #a8e063;
-}
-.city-weather-block-color-3 {
-    background-color: rgba(255, 245, 230, 0.85); /* Light orange tint */
-    border-left: 5px solid #f9a825;
-}
-.city-weather-block-color-4 {
-    background-color: rgba(245, 235, 255, 0.85); /* Light purple tint */
-    border-left: 5px solid #c8a2c8;
+
+/* --- Media Queries --- */
+@media (min-width: 550px) {
+    .container {
+        padding: 20px;
+    }
+    h1 {
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+    .search-container {
+        flex-direction: row; /* Side-by-side search input and button */
+    }
+    .weather-info-card h3 {
+        font-size: 1.4em;
+    }
+    .weather-info-card p {
+        font-size: 1em;
+    }
+    #geolocation-weather-section .current-weather-main .current-temp {
+        font-size: 1.8em;
+    }
+     #forecast-display-area h4 {
+        font-size: 1.3em;
+    }
+    .forecast-day p { /* General forecast text */
+        font-size: 0.9em;
+    }
+    .forecast-day .forecast-date { /* Specific forecast date */
+        font-size: 0.95em;
+    }
 }
 
-/* Styling for the block containing each city's weather (current + forecast) */
-.city-weather-block {
-    /* background-color: rgba(255, 255, 255, 0.85); */ /* Base color can be removed if classes always apply */
-    border: 1px solid #ddd; /* Keep a subtle overall border */
-    border-left-width: 5px; /* Make space for the colored left border */
-    border-left-style: solid;
-    border-left-color: #ccc; /* Default left border color if no class is applied */
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+/* Forecast day layout responsiveness */
+@media (max-width: 400px) { /* Very small screens */
+    .forecast-day {
+        flex-basis: 100%;
+    }
 }
-
-.city-weather-block .weather-info-card {
-    margin-bottom: 15px; /* Space between current weather card and its forecast */
-    box-shadow: none; /* Remove shadow if it's already on city-weather-block, or adjust as preferred */
-    border: 1px solid #eee; /* Optional: light border for the card inside the block */
+@media (min-width: 401px) and (max-width: 600px) { /* Small to medium */
+    .forecast-day {
+        flex-basis: calc(50% - 10px);
+    }
 }
-
-/* Styling for the container of a specific city's 5-day forecast */
-.city-forecast-container {
-    /* This container now gets a heading (h4) and a .forecast-days div inside it via JS */
+@media (min-width: 601px) and (max-width: 800px) { /* Medium-large */
+     .forecast-day {
+        flex-basis: calc(33.333% - 10px);
+    }
 }
-
-.city-forecast-container h4 {
-    text-align: center;
-    margin-bottom: 10px;
-    color: #333; /* Similar to old forecast heading */
-    font-size: 1.2em;
-}
-
-.city-forecast-container .forecast-days {
-    display: flex; /* Ensure this is still explicitly set if there was any overriding */
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-}
+/* For screens wider than 800px (max-width of .container),
+   the default .forecast-day rule (flex-basis: calc(20% - 10px); for 5 items)
+   will apply. */
