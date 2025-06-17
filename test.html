@@ -8,6 +8,13 @@
 <body>
     <div class="container">
         <h1>Weather App Test</h1>
+        <div class="search-container">
+            <input type="text" id="city-input" placeholder="Enter city name">
+            <button id="search-button">Search</button>
+        </div>
+        <div id="searched-weather-container">
+            <!-- Weather for searched locations will be added here -->
+        </div>
         <div class="weather-info">
             <p>Temperature: <span id="temperature">--</span>°C</p>
             <p>Wind Speed: <span id="wind-speed">--</span> m/s</p>
@@ -17,62 +24,119 @@
 
     <script src="script.js"></script>
     <script>
-        // Mock Geolocation
+        // --- Existing Mocks and Initial Setup ---
         navigator.geolocation.getCurrentPosition = function(success, error) {
             const position = {
-                coords: {
-                    latitude: 12.34,
-                    longitude: 56.78
-                }
+                coords: { latitude: 12.34, longitude: 56.78 }
             };
             success(position);
         };
 
-        // Mock Fetch
-        const mockWeatherData = {
-            main: {
-                temp: 25,
-                humidity: 60
-            },
-            wind: {
-                speed: 5
-            }
-        };
-        fetch = async function(url) {
-            return {
-                json: async () => mockWeatherData
-            };
+        const mockCurrentLocationWeatherData = {
+            main: { temp: 25, humidity: 60 },
+            wind: { speed: 5 },
+            name: "Current Location Test City" // Added for completeness
         };
 
-        // Run tests
+        const mockSearchedCityWeatherData = {
+            main: { temp: 15, humidity: 70 },
+            wind: { speed: 3 },
+            weather: [{ description: "cloudy" }],
+            name: "Searched Test City"
+        };
+
+        // Store original fetch
+        const originalFetch = window.fetch;
+
+        // --- Test Execution ---
         window.onload = async () => {
-            await getWeather(); // Ensure weather data is fetched and displayed
+            let allTestsPassed = true;
 
-            // Wait for the DOM to update
-            setTimeout(() => {
-                const tempElement = document.getElementById('temperature');
-                const windElement = document.getElementById('wind-speed');
-                const humidityElement = document.getElementById('humidity');
+            // --- Test 1: Current Location Weather ---
+            console.log("--- Testing Current Location Weather ---");
+            // Temporarily override fetch for current location
+            window.fetch = async (url) => {
+                if (url.includes('lat=12.34')) {
+                    return { ok: true, json: async () => mockCurrentLocationWeatherData };
+                }
+                return originalFetch(url); // Fallback to original fetch if URL doesn't match
+            };
+            await getWeather(); // Fetches and displays current location weather
 
-                let testsPassed = true;
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait for DOM update
 
-                if (tempElement.textContent !== '25') {
-                    console.error('Test Failed: Temperature mismatch. Expected 25, got', tempElement.textContent);
-                    testsPassed = false;
-                }
-                if (windElement.textContent !== '5') {
-                    console.error('Test Failed: Wind speed mismatch. Expected 5, got', windElement.textContent);
-                    testsPassed = false;
-                }
-                if (humidityElement.textContent !== '60') {
-                    console.error('Test Failed: Humidity mismatch. Expected 60, got', humidityElement.textContent);
-                    testsPassed = false;
-                }
+            const tempElement = document.getElementById('temperature');
+            const windElement = document.getElementById('wind-speed');
+            const humidityElement = document.getElementById('humidity');
 
-                if (testsPassed) {
-                    console.log('All tests passed!');
+            if (tempElement.textContent !== '25') {
+                console.error('Test Failed (Current Location): Temperature. Expected 25, got', tempElement.textContent);
+                allTestsPassed = false;
+            }
+            if (windElement.textContent !== '5') {
+                console.error('Test Failed (Current Location): Wind speed. Expected 5, got', windElement.textContent);
+                allTestsPassed = false;
+            }
+            if (humidityElement.textContent !== '60') {
+                console.error('Test Failed (Current Location): Humidity. Expected 60, got', humidityElement.textContent);
+                allTestsPassed = false;
+            }
+
+            // --- Test 2: Searched City Weather ---
+            console.log("\n--- Testing Searched City Weather ---");
+            // Override fetch for city search
+            window.fetch = async (url) => {
+                if (url.includes('q=Searched%20Test%20City')) {
+                     return { ok: true, json: async () => mockSearchedCityWeatherData };
+                } else if (url.includes('lat=12.34')) { // Keep current location mock active if needed
+                    return { ok: true, json: async () => mockCurrentLocationWeatherData };
                 }
-            }, 500); // Adjust timeout if necessary
+                return originalFetch(url);
+            };
+
+            document.getElementById('city-input').value = "Searched Test City";
+            document.getElementById('search-button').click();
+
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait for DOM update
+
+            const searchedContainer = document.getElementById('searched-weather-container');
+            const card = searchedContainer.querySelector('.weather-info-card');
+
+            if (!card) {
+                console.error('Test Failed (Searched City): Weather card not found.');
+                allTestsPassed = false;
+            } else {
+                if (!card.innerHTML.includes("Weather in Searched Test City")) {
+                    console.error('Test Failed (Searched City): City name not found or incorrect.');
+                    allTestsPassed = false;
+                }
+                if (!card.innerHTML.includes("Temperature: 15°C")) {
+                    console.error('Test Failed (Searched City): Temperature not found or incorrect.');
+                    allTestsPassed = false;
+                }
+                if (!card.innerHTML.includes("Wind Speed: 3 m/s")) {
+                    console.error('Test Failed (Searched City): Wind speed not found or incorrect.');
+                    allTestsPassed = false;
+                }
+                if (!card.innerHTML.includes("Humidity: 70%")) {
+                    console.error('Test Failed (Searched City): Humidity not found or incorrect.');
+                    allTestsPassed = false;
+                }
+                if (!card.innerHTML.includes("Condition: cloudy")) {
+                    console.error('Test Failed (Searched City): Condition not found or incorrect.');
+                    allTestsPassed = false;
+                }
+            }
+
+            // --- Final Test Result ---
+            if (allTestsPassed) {
+                console.log("\nAll tests passed!");
+            } else {
+                console.error("\nSome tests failed.");
+            }
+
+            // Restore original fetch
+            window.fetch = originalFetch;
         };
     </script>
 </body>

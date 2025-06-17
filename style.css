@@ -4,16 +4,79 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #f0f0f0;
+    background: linear-gradient(to right, #6dd5ed, #2193b0);
+    margin: 0; /* Add this to remove default body margin */
 }
 
 .container {
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
+/* Styling for the search input and button */
+.search-container {
+    display: flex;
+    margin-bottom: 20px;
+    gap: 10px; /* Adds space between input and button */
+}
+
+#city-input {
+    flex-grow: 1; /* Allows input to take available space */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#search-button {
+    padding: 10px 15px;
+    background-color: #2193b0; /* Matching one of the gradient colors */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#search-button:hover {
+    background-color: #6dd5ed; /* Lighter shade for hover */
+}
+
+/* Styling for the searched weather results container and cards */
+#searched-weather-container {
+    margin-top: 20px;
+}
+
+.weather-info-card {
+    background-color: rgba(255, 255, 255, 0.95); /* Slightly more opaque than main container for emphasis */
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 15px; /* Space between multiple searched city cards, if we implement that later */
+}
+
+.weather-info-card h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.weather-info-card p {
+    margin-bottom: 8px;
+    color: #555;
+}
+
+/* Minor adjustment to the main weather info for current location for consistency */
+.weather-info {
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.85); /* Slightly different from searched cards for distinction */
+    border-radius: 6px;
+}
+
+/* Keep existing rule for p tags inside .weather-info, or adjust if necessary.
+   If the new .weather-info rule above is sufficient, this might be redundant or need adjustment.
+   For now, I'll keep it as it was, assuming it might still be relevant for the direct children p tags. */
 .weather-info p {
     margin-bottom: 10px;
 }
