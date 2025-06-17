@@ -7,123 +7,142 @@
 </head>
 <body>
     <div class="container">
-        <h1>Weather App Test</h1>
+        <h1>WeatherApp Test</h1>
         <div class="search-container">
             <input type="text" id="city-input" placeholder="Enter city name">
             <button id="search-button">Search</button>
         </div>
         <div id="searched-weather-container">
-            <!-- Weather for searched locations will be added here -->
-        </div>
-        <div class="weather-info">
-            <p>Temperature: <span id="temperature">--</span>°C</p>
-            <p>Wind Speed: <span id="wind-speed">--</span> m/s</p>
-            <p>Humidity: <span id="humidity">--</span>%</p>
+            <!-- Weather for searched locations will be added here by script.js -->
         </div>
     </div>
 
     <script src="script.js"></script>
     <script>
-        // --- Existing Mocks and Initial Setup ---
-        navigator.geolocation.getCurrentPosition = function(success, error) {
-            const position = {
-                coords: { latitude: 12.34, longitude: 56.78 }
-            };
-            success(position);
+        // --- Mock Data ---
+        const mockSearchedCity1WeatherData = {
+            coord: { lat: 10, lon: 20 },
+            main: { temp: 22, feels_like: 20, humidity: 65 },
+            wind: { speed: 4 },
+            weather: [{ description: "sunny", icon: "01d" }],
+            sys: { sunrise: 1670000000, sunset: 1670040000 },
+            timezone: 0, // UTC for simplicity in test
+            name: "Test City Alpha"
+        };
+        const mockSearchedCity1ForecastData = {
+            city: { name: "Test City Alpha" },
+            list: [
+                { dt: 1670000000, dt_txt: "2023-12-03 12:00:00", main: { temp: 22 }, weather: [{description: "clear sky", icon: "01d"}], pop: 0.1, wind: {speed: 3}},
+                { dt: 1670086400, dt_txt: "2023-12-04 12:00:00", main: { temp: 23 }, weather: [{description: "few clouds", icon: "02d"}], pop: 0.2, wind: {speed: 4}},
+                // Add more entries to cover 5 days if full processing is tested
+            ]
         };
 
-        const mockCurrentLocationWeatherData = {
-            main: { temp: 25, humidity: 60 },
-            wind: { speed: 5 },
-            name: "Current Location Test City" // Added for completeness
+        const mockSearchedCity2WeatherData = {
+            coord: { lat: 30, lon: 40 },
+            main: { temp: 18, feels_like: 17, humidity: 70 },
+            wind: { speed: 6 },
+            weather: [{ description: "rainy", icon: "10d" }],
+            sys: { sunrise: 1670005000, sunset: 1670045000 },
+            timezone: 0,
+            name: "Test City Beta"
+        };
+        const mockSearchedCity2ForecastData = {
+            city: { name: "Test City Beta" },
+            list: [
+                { dt: 1670000000, dt_txt: "2023-12-03 12:00:00", main: { temp: 18 }, weather: [{description: "light rain", icon: "10d"}], pop: 0.8, wind: {speed: 5}},
+                // Add more entries
+            ]
         };
 
-        const mockSearchedCityWeatherData = {
-            main: { temp: 15, humidity: 70 },
-            wind: { speed: 3 },
-            weather: [{ description: "cloudy" }],
-            name: "Searched Test City"
-        };
-
-        // Store original fetch
         const originalFetch = window.fetch;
+        let fetchCallCount = 0;
 
         // --- Test Execution ---
         window.onload = async () => {
+            console.log("--- Weather App Tests Initiated ---");
             let allTestsPassed = true;
 
-            // --- Test 1: Current Location Weather ---
-            console.log("--- Testing Current Location Weather ---");
-            // Temporarily override fetch for current location
-            window.fetch = async (url) => {
-                if (url.includes('lat=12.34')) {
-                    return { ok: true, json: async () => mockCurrentLocationWeatherData };
-                }
-                return originalFetch(url); // Fallback to original fetch if URL doesn't match
-            };
-            await getWeather(); // Fetches and displays current location weather
+            // Helper to simulate search
+            async function simulateSearch(cityName, weatherMock, forecastMock) {
+                fetchCallCount = 0;
+                window.fetch = async (url) => {
+                    fetchCallCount++;
+                    if (url.includes(`/weather?q=${encodeURIComponent(cityName)}`)) {
+                        console.log(`Mock fetch for: ${cityName} current weather`);
+                        return { ok: true, json: async () => weatherMock };
+                    }
+                    if (url.includes(`/forecast?q=${encodeURIComponent(cityName)}`) || (url.includes(`/forecast?lat=${weatherMock.coord.lat}&lon=${weatherMock.coord.lon}`))) {
+                        console.log(`Mock fetch for: ${cityName} forecast`);
+                        return { ok: true, json: async () => forecastMock };
+                    }
+                    console.warn("Unexpected fetch call:", url);
+                    return originalFetch(url);
+                };
 
-            await new Promise(resolve => setTimeout(resolve, 500)); // Wait for DOM update
-
-            const tempElement = document.getElementById('temperature');
-            const windElement = document.getElementById('wind-speed');
-            const humidityElement = document.getElementById('humidity');
-
-            if (tempElement.textContent !== '25') {
-                console.error('Test Failed (Current Location): Temperature. Expected 25, got', tempElement.textContent);
-                allTestsPassed = false;
-            }
-            if (windElement.textContent !== '5') {
-                console.error('Test Failed (Current Location): Wind speed. Expected 5, got', windElement.textContent);
-                allTestsPassed = false;
-            }
-            if (humidityElement.textContent !== '60') {
-                console.error('Test Failed (Current Location): Humidity. Expected 60, got', humidityElement.textContent);
-                allTestsPassed = false;
+                document.getElementById('city-input').value = cityName;
+                document.getElementById('search-button').click();
+                await new Promise(resolve => setTimeout(resolve, 500)); // Wait for DOM update
             }
 
-            // --- Test 2: Searched City Weather ---
-            console.log("\n--- Testing Searched City Weather ---");
-            // Override fetch for city search
-            window.fetch = async (url) => {
-                if (url.includes('q=Searched%20Test%20City')) {
-                     return { ok: true, json: async () => mockSearchedCityWeatherData };
-                } else if (url.includes('lat=12.34')) { // Keep current location mock active if needed
-                    return { ok: true, json: async () => mockCurrentLocationWeatherData };
-                }
-                return originalFetch(url);
-            };
-
-            document.getElementById('city-input').value = "Searched Test City";
-            document.getElementById('search-button').click();
-
-            await new Promise(resolve => setTimeout(resolve, 500)); // Wait for DOM update
+            // --- Test 1: Search for First City (Alpha) ---
+            console.log("\n--- Testing First City Search (Alpha) ---");
+            await simulateSearch("Test City Alpha", mockSearchedCity1WeatherData, mockSearchedCity1ForecastData);
 
             const searchedContainer = document.getElementById('searched-weather-container');
-            const card = searchedContainer.querySelector('.weather-info-card');
+            let cityBlocks = searchedContainer.querySelectorAll('.city-weather-block');
 
-            if (!card) {
-                console.error('Test Failed (Searched City): Weather card not found.');
+            if (cityBlocks.length !== 1) {
+                console.error('Test Failed (Alpha): Expected 1 city block, found', cityBlocks.length);
                 allTestsPassed = false;
             } else {
-                if (!card.innerHTML.includes("Weather in Searched Test City")) {
-                    console.error('Test Failed (Searched City): City name not found or incorrect.');
+                const block1 = cityBlocks[0];
+                if (!block1.classList.contains('city-weather-block-color-1')) { // Assumes color index starts at 0 and first class is color-1
+                    console.error('Test Failed (Alpha): Missing or incorrect color class on block 1.');
                     allTestsPassed = false;
                 }
-                if (!card.innerHTML.includes("Temperature: 15°C")) {
-                    console.error('Test Failed (Searched City): Temperature not found or incorrect.');
+                if (!block1.innerHTML.includes("Current Weather in Test City Alpha")) {
+                    console.error('Test Failed (Alpha): City name not found in current weather.');
                     allTestsPassed = false;
                 }
-                if (!card.innerHTML.includes("Wind Speed: 3 m/s")) {
-                    console.error('Test Failed (Searched City): Wind speed not found or incorrect.');
+                // Check for PoP and Wind in forecast (assuming at least one forecast day is rendered)
+                const forecastPop = block1.querySelector('.forecast-pop');
+                const forecastWind = block1.querySelector('.forecast-wind');
+                if (!forecastPop || !forecastPop.textContent.includes("Precip: 10%")) { // 0.1 * 100
+                    console.error('Test Failed (Alpha): Precipitation info missing or incorrect in forecast.', forecastPop ? forecastPop.textContent : 'Element not found');
                     allTestsPassed = false;
                 }
-                if (!card.innerHTML.includes("Humidity: 70%")) {
-                    console.error('Test Failed (Searched City): Humidity not found or incorrect.');
+                if (!forecastWind || !forecastWind.textContent.includes("Wind: 3.0 m/s")) {
+                     console.error('Test Failed (Alpha): Wind info missing or incorrect in forecast.', forecastWind ? forecastWind.textContent : 'Element not found');
                     allTestsPassed = false;
                 }
-                if (!card.innerHTML.includes("Condition: cloudy")) {
-                    console.error('Test Failed (Searched City): Condition not found or incorrect.');
+            }
+
+            // --- Test 2: Search for Second City (Beta) ---
+            console.log("\n--- Testing Second City Search (Beta) ---");
+            // Reset cityBlockColorIndex for predictable class if script.js is reloaded/reset somehow in test environment.
+            // If script.js state persists, this might not be needed or might need to align with expected color.
+            // For this test, let's assume script.js state persists for cityBlockColorIndex.
+            await simulateSearch("Test City Beta", mockSearchedCity2WeatherData, mockSearchedCity2ForecastData);
+
+            cityBlocks = searchedContainer.querySelectorAll('.city-weather-block');
+
+            if (cityBlocks.length !== 2) {
+                console.error('Test Failed (Beta): Expected 2 city blocks, found', cityBlocks.length);
+                allTestsPassed = false;
+            } else {
+                const block2 = cityBlocks[1]; // Second block
+                 if (!block2.classList.contains('city-weather-block-color-2')) { // Expecting next color
+                    console.error('Test Failed (Beta): Missing or incorrect color class on block 2.');
+                    allTestsPassed = false;
+                }
+                if (!block2.innerHTML.includes("Current Weather in Test City Beta")) {
+                    console.error('Test Failed (Beta): City name not found in current weather.');
+                    allTestsPassed = false;
+                }
+                 const forecastPopBeta = block2.querySelector('.forecast-pop');
+                if (!forecastPopBeta || !forecastPopBeta.textContent.includes("Precip: 80%")) { // 0.8 * 100
+                    console.error('Test Failed (Beta): Precipitation info missing or incorrect in forecast.', forecastPopBeta ? forecastPopBeta.textContent : 'Element not found');
                     allTestsPassed = false;
                 }
             }
@@ -135,8 +154,7 @@
                 console.error("\nSome tests failed.");
             }
 
-            // Restore original fetch
-            window.fetch = originalFetch;
+            window.fetch = originalFetch; // Restore original fetch
         };
     </script>
 </body>

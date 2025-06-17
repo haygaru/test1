@@ -47,6 +47,7 @@ body {
 /* Styling for the searched weather results container and cards */
 #searched-weather-container {
     margin-top: 20px;
+    padding-top: 10px; /* Add some space above the first city block */
 }
 
 .weather-info-card {
@@ -82,26 +83,27 @@ body {
 }
 
 
-/* Main weather info for current location */
+/* Main weather info for current location (styles for the removed section) */
+/* These .weather-info rules are now effectively unused but kept for reference or if section is re-added */
 .weather-info {
     padding: 15px;
-    background-color: rgba(255, 255, 255, 0.85); /* Slightly different from searched cards for distinction */
+    background-color: rgba(255, 255, 255, 0.85);
     border-radius: 6px;
 }
 
-/* Styling for detailed information in Current Weather section */
 .weather-info p {
-    margin-bottom: 8px; /* Consistent margin for all p tags in this section */
-    font-size: 1em;   /* Ensure consistent font size */
-    line-height: 1.4; /* Improve readability */
+    margin-bottom: 8px;
+    font-size: 1em;
+    line-height: 1.4;
 }
 
 
-/* Styling for the 5-Day Forecast Section */
+/* Styling for the 5-Day Forecast Section (old static container, now unused) */
+/* These #forecast-container rules are now effectively unused */
 #forecast-container {
     margin-top: 30px;
     padding: 15px;
-    background-color: rgba(255, 255, 255, 0.8); /* Slightly different background for distinction */
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 6px;
 }
 
@@ -111,6 +113,7 @@ body {
     color: #333;
 }
 
+/* General forecast day styling - these are still used by dynamically created forecasts */
 .forecast-days {
     display: flex;
     justify-content: space-between; /* Distribute days evenly */
@@ -120,7 +123,7 @@ body {
 
 .forecast-day {
     background-color: rgba(255, 255, 255, 0.9);
-    padding: 10px;
+    padding: 12px 10px; /* Slightly increase vertical padding if needed */
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     text-align: center;
@@ -145,9 +148,18 @@ body {
     font-size: 0.9em;
 }
 
-.forecast-day .forecast-condition { /* Specific class for condition in forecast */
+.forecast-day .forecast-condition {
     font-size: 0.85em;
     text-transform: capitalize;
+    color: #555; /* Ensure it's not too light if other p tags are lighter */
+    min-height: 2.5em; /* Attempt to reserve space for 1-2 lines of description */
+}
+
+.forecast-day .forecast-pop,
+.forecast-day .forecast-wind {
+    font-size: 0.8em; /* Slightly smaller for secondary info, or match other details like condition */
+    color: #666; /* Slightly lighter color for secondary info */
+    margin-top: 3px; /* Add a little space above these new lines */
 }
 
 /* Responsive adjustments for forecast days */
@@ -176,44 +188,100 @@ body {
     vertical-align: middle; /* Helps align if next to text */
 }
 
-/* Current Weather Icon Styling */
+/* Current Weather Icon Styling (for the removed section, now unused) */
 #current-weather-icon {
-    width: 70px; /* Slightly larger for main display */
+    width: 70px;
     height: 70px;
-    margin-right: 10px; /* Space if text is directly next to it */
+    margin-right: 10px;
 }
 
 .current-weather-main {
-    display: flex; /* Align icon and temperature nicely */
-    align-items: center; /* Vertically center items in this flex container */
+    display: flex;
+    align-items: center;
     margin-bottom: 5px;
 }
 
 .current-weather-main .current-temp {
-    font-size: 1.8em; /* Make temperature more prominent */
+    font-size: 1.8em;
     font-weight: bold;
-    margin: 0; /* Remove default p margin */
+    margin: 0;
 }
 
 #current-weather-description {
-    text-transform: capitalize; /* Nice capitalization for description */
+    text-transform: capitalize;
     font-size: 1.1em;
-    margin-bottom: 10px; /* This was already part of .weather-info p, but explicit is fine */
+    margin-bottom: 10px;
 }
 
 
 /* Searched City Card Icon Styling */
 .weather-info-card .weather-icon {
-    display: block; /* Make it a block to allow margin auto for centering */
-    margin: 0 auto 5px auto; /* Center the icon */
+    display: block;
+    margin: 0 auto 5px auto;
     width: 60px;
     height: 60px;
 }
 
 /* Forecast Day Icon Styling */
-.forecast-day .forecast-icon { /* Using .forecast-icon to be specific */
+.forecast-day .forecast-icon {
     width: 40px;
     height: 40px;
-    display: block; /* Center it */
+    display: block;
     margin: 5px auto;
+}
+
+/* Predefined background tints for city weather blocks */
+.city-weather-block-color-1 {
+    background-color: rgba(230, 240, 255, 0.85); /* Light blue tint */
+    border-left: 5px solid #6dd5ed;
+}
+.city-weather-block-color-2 {
+    background-color: rgba(230, 255, 230, 0.85); /* Light green tint */
+    border-left: 5px solid #a8e063;
+}
+.city-weather-block-color-3 {
+    background-color: rgba(255, 245, 230, 0.85); /* Light orange tint */
+    border-left: 5px solid #f9a825;
+}
+.city-weather-block-color-4 {
+    background-color: rgba(245, 235, 255, 0.85); /* Light purple tint */
+    border-left: 5px solid #c8a2c8;
+}
+
+/* Styling for the block containing each city's weather (current + forecast) */
+.city-weather-block {
+    /* background-color: rgba(255, 255, 255, 0.85); */ /* Base color can be removed if classes always apply */
+    border: 1px solid #ddd; /* Keep a subtle overall border */
+    border-left-width: 5px; /* Make space for the colored left border */
+    border-left-style: solid;
+    border-left-color: #ccc; /* Default left border color if no class is applied */
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.city-weather-block .weather-info-card {
+    margin-bottom: 15px; /* Space between current weather card and its forecast */
+    box-shadow: none; /* Remove shadow if it's already on city-weather-block, or adjust as preferred */
+    border: 1px solid #eee; /* Optional: light border for the card inside the block */
+}
+
+/* Styling for the container of a specific city's 5-day forecast */
+.city-forecast-container {
+    /* This container now gets a heading (h4) and a .forecast-days div inside it via JS */
+}
+
+.city-forecast-container h4 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #333; /* Similar to old forecast heading */
+    font-size: 1.2em;
+}
+
+.city-forecast-container .forecast-days {
+    display: flex; /* Ensure this is still explicitly set if there was any overriding */
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
 }
